@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width-device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="sie-edge" />
+    <link href="https://unpkg.com/ionicons@4.2.2/dist/css/ionicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>Login 
+    </title>
+   
+</head>
+
+<body>
+
+    <div class="container" id="container">
+        <div class="form-container sign-up-container">
+            <form action="#">
+                <h1>Create Account</h1>
+                <div class="social-container">
+                    <a href="#" class="social">
+                        <ion-icon name="logo-facebook"></ion-icon>
+                    </a>
+                    <a href="#" class="social">
+                        <ion-icon name="logo-googleplus"></ion-icon>
+                    </a>
+                    <a href="#" class="social">
+                        <ion-icon name="logo-linkedin"></ion-icon>
+                    </a>
+                </div>
+                <span>or use your email for registration</span>
+                <input type="text" placeholder="Name">
+                <input type="email" placeholder="Email">
+                <input type="password" placeholder="Password">
+                <button>Sign Up</button>
+            </form>
+        </div>
+        <div class="form-container sign-in-container">
+            <form action="#">
+                <h1>Sign In</h1>
+                <div class="social-container">
+                    <a href="#" class="social">
+                        <ion-icon name="logo-facebook"></ion-icon>
+                    </a>
+                    <a href="#" class="social">
+                        <ion-icon name="logo-googleplus"></ion-icon>
+                    </a>
+                    <a href="#" class="social">
+                        <ion-icon name="logo-linkedin"></ion-icon>
+                    </a>
+                </div>
+                <span>or use your account</span>
+                <input type="email" placeholder="Email">
+                <input type="password" placeholder="Password">
+                <button><a href="spck.html">Sign In</a></button>
+            </form>
+        </div>
+        <div class="overlay-container">
+            <div class="overlay">
+                <div class="overlay-panel overlay-left">
+                    <h1>Welcome Back</h1>
+                    <p>To keep connected with us please login with your personal info</p>
+                    <button class="ghost" id="signIn">Sign In</button>
+                </div>
+                <div class="overlay-panel overlay-right">
+                    <h1>Hello,Friend</h1>
+                    <p>Enter your personal details and start journey with us</p>
+                    <button class="ghost" id="signUp">Sign Up</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+      
+    const signUpButton = document.getElementById('signUp');
+      const signInButton = document.getElementById('signIn');
+      const container = document.getElementById('container');
+      
+      
+      signUpButton.addEventListener('click', () => {
+          container.classList.add("right-panel-active");
+      });
+      
+      
+      signInButton.addEventListener('click', () => {
+          container.classList.remove("right-panel-active");
+      });
+      class User {
+    constructor(username, email, password, role) {
+      this.username = username;
+      this.email = email;
+      this.password = password;
+      this.role = role;
+    }
+  }
+  
+  class AccountManager {
+    constructor() {
+        
+      this.users = JSON.parse(localStorage.getItem('users')) || [];
+      this.loggedInUser = JSON.parse(localStorage.getItem('loggedInUser')) || null;
+    }
+     
+    register(username, email, password, role) {
+      const user = new User(username, email, password, role);
+      this.users.push(user);
+      localStorage.setItem('users', JSON.stringify(this.users));
+      localStorage.setItem('loggedInUser', JSON.stringify(user));
+      this.loggedInUser = user;
+      return user;
+    }
+      
+    login(username, password) {
+      const user = this.users.find(user => user.email.toLowerCase() === username.toLowerCase());
+      if (user && user.password === password) {
+        this.loggedInUser = user;
+        localStorage.setItem('loggedInUser', JSON.stringify(this.loggedInUser));
+        if (user.role === 'cashier') {
+          window.location.href = 'cashier.html';
+        } else if (user.role === 'admin') {
+          window.location.href = 'admin.html';
+        } else {
+          window.location.href = 'home.html';
+        }
+        return true;
+      }
+      return false;
+    }
+    
+   
+       logout() {
+      this.loggedInUser = null;
+      localStorage.removeItem('loggedInUser');
+    }
+     
+       
+       getCurrentUser() {
+      return this.loggedInUser;
+    }
+  
+      
+      createCashierAccount(username, email, password) {
+      const user = this.register(username, email, password, 'cashier');
+      return user;
+    }
+    
+      
+    createAdminAccount(username, email, password) {
+      const user = this.register(username, email, password, 'admin');
+      return user;
+    }
+      
+    
+      getCashierAccounts() {
+      return this.users.filter(user => user.role === 'cashier');
+     }
+  }
+      
+      $(document).ready(function() {
+       const accountManager = new AccountManager();
+  
+   
+       $('#register-btn').click(function(e) {
+        e.preventDefault();
+       const username = $('#register-form input[name="username"]').val();
+       const email = $('#register-form input[name="email"]').val();
+       const password = $('#register-form input[name="pswd"]').val();
+       const role = $('#register-form select[name="role"]').val();
+       const user = accountManager.register(username, email, password, role);
+      
+       alert('Successfully registered');
+       
+       $('#register-form').trigger('reset');
+       $('#login-form').show(); 
+       $('#register-form').hide(); 
+     });
+  
+        
+        $('#login-btn').click(function(e) {
+        e.preventDefault();
+      const username = $('#login-form input[name="email"]').val(); 
+      const password = $('#login-form input[name="pswd"]').val();
+      const isLoggedIn = accountManager.login(username, password);
+      if (isLoggedIn) {
+         alert('Login successful!');
+         $(this).trigger('reset'); 
+         window.location.href = 'home.html'; // 
+         } else {
+          alert('Invalid username or password!');
+              }
+           });
+  
+       
+       const currentUser = accountManager.getCurrentUser();
+        console.log('Current user:', currentUser);   
+          });
+    </script>
+    
+</body>
+
+</html>
+
